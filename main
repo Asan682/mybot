@@ -1,0 +1,70 @@
+import random
+import telebot
+from telebot.types import Message
+
+bot = telebot.TeleBot('7915205881:AAFrWvZkPvCuzKnZAODNpuV5Clvwyg0E314')
+
+
+@bot.message_handler(commands=['start'])
+def cmd_start(message: Message):
+    bot.reply_to(message,'Привет! Я бот для отдыха напишите /help и я покажу какие у меня есть команды')
+
+@bot.message_handler(commands=['password'])
+def cmd_password(message: Message):
+    glas = 'eyuioaEYUIOA'
+    sogl = 'qwrtpsdfghjklzxcvbnmQWRTPSDFGHJKLZXCVBNM'
+    digits = '1234567890'
+    symbols = '!@#?_=+'
+    password = ''
+
+    for i in range(random.randint(3,4)):
+        password += random.choice(sogl) + random.choice(glas)
+
+    for i in range(random.randint(2,4)):
+        password += random.choice(digits)
+
+    for i in range(random.randint(2,4)):
+        password += random.choice(symbols)
+    bot.reply_to(message,'Ваш пароль ' + password)
+@bot.message_handler(commands=['coin'])
+def cmd_coin(message: Message):
+    coin = ['orel','reshka']
+    coin = random.choice(coin)
+    if coin == 'orel':
+        bot.reply_to(message,'Вам выпал орел')
+    elif coin == 'reshka':
+        bot.reply_to(message,'Вам выпала решка')
+
+@bot.message_handler(commands=['name'])
+def cmd_name(message: Message):
+    bot.reply_to(message, 'Как вас зовут?')
+    bot.register_next_step_handler(message, get_name)
+
+def get_name(message:Message):
+    name = message.text
+    bot.reply_to(message, 'Ваше имя ' + name)
+
+@bot.message_handler(commands=['help'])
+def cmd_help(message: Message):
+    bot.reply_to(message,'Команды: /password - команда для генерации пароля, /coin - команда для подбрасывания монетки, /name - команда для получения имени пользователя')
+
+@bot.message_handler(commands=['riddle'])
+def cmd_riddle(message: Message):
+    riddles = ['straus,electrichka']
+    riddles = random.choice(riddles)
+    answer1 = message.text
+    answer2 = message.text
+    if riddles == 'straus':
+        bot.reply_to(message,'Загадка: страус может назвать себя птицей?')
+        if answer1 == 'Нет':
+            bot.reply_to(message,'Это правильный ответ, потому что страусы не умеют разговаривать')
+        elif answer1 == 'Да':
+            bot.reply_to(message,'Это неправильный ответ, потому что страусы не умеют разговаривать')
+    elif riddles == 'electrichka':
+        bot.reply_to(message,'Загадка: электричка едет со скоростью 80 км/ч. В какую сторону летит дым?')
+        if answer2 == 'У электрички нет дыма':
+            bot.reply_to(message,'Это правильный ответ')
+        elif answer2 == '':
+            bot.reply_to(message,'Это неправильный ответ')
+
+bot.polling()
