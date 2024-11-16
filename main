@@ -1,5 +1,6 @@
 import random
 import telebot
+import os
 from telebot.types import Message
 
 bot = telebot.TeleBot('7915205881:AAFrWvZkPvCuzKnZAODNpuV5Clvwyg0E314')
@@ -46,25 +47,57 @@ def get_name(message:Message):
 
 @bot.message_handler(commands=['help'])
 def cmd_help(message: Message):
-    bot.reply_to(message,'Команды: /password - команда для генерации пароля, /coin - команда для подбрасывания монетки, /name - команда для получения имени пользователя')
+    bot.reply_to(message,'Команды: /password - команда для генерации пароля, /coin - команда для подбрасывания монетки, /name - команда для получения имени пользователя, /knb - команда для игры камень ножницы бумага с компьютером /task - записать задачи, /read - прочитать задачи, /mem_developers - случайный мем про программистов, /mem_animals - случайный мем с животными')
 
-@bot.message_handler(commands=['riddle'])
-def cmd_riddle(message: Message):
-    riddles = ['straus,electrichka']
-    riddles = random.choice(riddles)
-    answer1 = message.text
-    answer2 = message.text
-    if riddles == 'straus':
-        bot.reply_to(message,'Загадка: страус может назвать себя птицей?')
-        if answer1 == 'Нет':
-            bot.reply_to(message,'Это правильный ответ, потому что страусы не умеют разговаривать')
-        elif answer1 == 'Да':
-            bot.reply_to(message,'Это неправильный ответ, потому что страусы не умеют разговаривать')
-    elif riddles == 'electrichka':
-        bot.reply_to(message,'Загадка: электричка едет со скоростью 80 км/ч. В какую сторону летит дым?')
-        if answer2 == 'У электрички нет дыма':
-            bot.reply_to(message,'Это правильный ответ')
-        elif answer2 == '':
-            bot.reply_to(message,'Это неправильный ответ')
+@bot.message_handler(commands=['knb'])
+def cmd_cnb(message: Message):
+    bot.reply_to(message, 'Что вы поставите?')
+    bot.register_next_step_handler(message, get_knb)
+  
+def get_knb(message: Message):
+    player = message.text
+    comp = random.choice(['Камень', 'Ножницы', 'Бумага'])
+    if player == comp:
+        bot.reply_to(message, 'Ничья!')
+    elif player == 'Камень' and comp == 'Ножницы':
+        bot.reply_to(message, 'Вы победили!')
+    elif player == 'Ножницы' and comp == 'Бумага':
+        bot.reply_to(message, 'Вы победили!')
+    elif player == 'Бумага' and comp == 'Камень':
+        bot.reply_to(message, 'Вы победили!')
+    else:
+        bot.reply_to(message, 'Вы проиграли!')
 
-bot.polling()
+@bot.message_handler(commands=['task'])
+def cmd_task(message: Message):
+    bot.reply_to(message, 'Какую задачу вы хотите добавить?')
+    bot.register_next_step_handler(message, add_task)
+def add_task(message: Message):
+    task = message.text
+    with open('tasks.txt', 'a', encoding='utf-8') as file:
+        file.write(task + '\n')
+        bot.reply_to(message, 'Ваша задача добавлена')
+
+@bot.message_handler(commands=['read'])
+def cmd_read(message: Message):
+    with open('tasks.txt', 'r', encoding='utf-8') as file:
+        text = file.read()
+        bot.reply_to(message, text)
+
+@bot.message_handler(commands=['mem_developers'])
+def cmd_mem(message: Message):
+    memdevelopers = os.listdir('images')
+    mem1 = random.choice(memdevelopers)
+    mem1 = 'images/' + mem1
+    with open(mem1, 'rb') as file:
+        bot.send_photo(message.chat.id, file)
+    
+@bot.message_handler(commands=['mem_animals'])
+def cmd_mem(message: Message):
+    memanimals = os.listdir('memsanimals')
+    mem2 = random.choice(memanimals)
+    mem2 = 'memsanimals/' + mem2
+    with open(mem2, 'rb') as file:
+        bot.send_photo(message.chat.id, file)
+
+bot.polling(
